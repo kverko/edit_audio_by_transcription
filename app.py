@@ -89,7 +89,6 @@ if st.button("Zapisz zmiany"):
     output_audio = AudioSegment.empty()
     last_end = 0
     for start, end in zip(rem_starts, rem_ends):
-        print(start, end)
         output_audio += temp_audio[last_end:start]
         last_end = end
     output_audio += temp_audio[last_end:]
