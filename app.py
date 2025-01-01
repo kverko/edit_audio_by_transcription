@@ -98,15 +98,15 @@ if st.button("Zapisz zmiany"):
     
 
 
-    words = new_text.split()
+    words = new_text.split(' ')
     rem_starts = []
     rem_ends = []
     
     for idx, word in enumerate(words):
         if word.startswith("[["):
-            rem_starts.append(transcription['words'][idx]['start'])
+            rem_starts.append(transcription['words'][idx]['start']*1000)
         if word.endswith("]]"):
-            rem_ends.append(transcription['words'][idx]['end'])
+            rem_ends.append(transcription['words'][idx]['end']*1000)
 
     
     temp_audio = AudioSegment.from_file(audio)
@@ -114,8 +114,10 @@ if st.button("Zapisz zmiany"):
     for start, end in zip(rem_starts, rem_ends):
         print(start, end)
         output_audio += temp_audio[start:end]
-    output_audio.export("output.mp3", format="mp3")
+    
+    output_audio_bytes = BytesIO()
+    output_audio.export(output_audio_bytes, format="mp3")
 
-    st.audio("output.mp3", format="audio/mp3")
+    st.audio(output_audio_bytes, format="audio/mp3")
 
     
