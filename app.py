@@ -84,8 +84,8 @@ if new_text:
         rem_ends = []
         
         for idx, word in enumerate(words):
-            _start = transcription['words'][idx]['start']*1000
-            _end = transcription['words'][idx]['end']*1000
+            _start = transcription['words'][idx].start*1000
+            _end = transcription['words'][idx].end*1000
             _med = (_start + _end) / 2
             if '[[' in word:
                 if word.find('[[') < len(word)/3:
