@@ -69,7 +69,7 @@ if new_audio:
     transcription = transcribe_audio(st.session_state["new_audio_bytes"])
 
 new_text = st.text_area(
-    "Transkrypcja (zaznacz fragment, który chcesz usunąć z audio)", 
+    "Transkrypcja (zaznacz fragment, który chcesz usunąć z audio przy pomocy [[ i ]])", 
     value=transcription['text'],
 )
 text_with_edits = new_text
