@@ -47,7 +47,6 @@ if not st.session_state.get("openai_api_key"):
 
 st.session_state.setdefault("new_audio_bytes", None)
 st.session_state.setdefault("new_audio_text", "")
-st.session_state.setdefault("transcription", "")
 
 st.title("Wycinanie fragmentów audio")
 
@@ -68,34 +67,57 @@ if new_audio:
     st.audio(audio, format="audio/mp3")
     transcription = transcribe_audio(st.session_state["new_audio_bytes"])
 
-new_text = st.text_area(
-    "Transkrypcja (zaznacz fragment, który chcesz usunąć z audio przy pomocy [[ i ]])", 
-    value=transcription['text'],
-)
-text_with_edits = new_text
-if st.button("Zapisz zmiany"):
-    words = new_text.split(' ')
-    rem_starts = []
-    rem_ends = []
-    
-    for idx, word in enumerate(words):        
-        if '[[' in word:
-            rem_starts.append(transcription['words'][idx]['start']*1000)        
-        if ']]' in word:
-            rem_ends.append(transcription['words'][idx]['end']*1000)
+new_text = ""
+if new_audio:
+   
+    new_text = st.text_area(
+        "",  value=transcription['text'])
+    st.markdown(
+        "Zaznacz w powyższym tekście fragmenty, który chcesz usunąć z audio, " 
+        "otaczając je podwójnymi nawiasami kwadratowymi np. [[to jest fragment do usunięcia]]")
 
-    
-    temp_audio = AudioSegment.from_file(audio)
-    output_audio = AudioSegment.empty()
-    last_end = 0
-    for start, end in zip(rem_starts, rem_ends):
-        output_audio += temp_audio[last_end:start]
-        last_end = end
-    output_audio += temp_audio[last_end:]
-    
-    output_audio_bytes = BytesIO()
-    output_audio.export(output_audio_bytes, format="mp3")
+if new_text:
+    text_with_edits = new_text
+    if st.button("Wytnij zaznaczone fragmenty"):
+        words = new_text.split(' ')
+        rem_starts = []
+        rem_ends = []
+        
+        for idx, word in enumerate(words):
+            _start = transcription['words'][idx]['start']*1000
+            _end = transcription['words'][idx]['end']*1000
+            _med = (_start + _end) / 2
+            if '[[' in word:
+                if word.find('[[') < len(word)/3:
+                    rem_starts.append(_start)
+                elif word.find('[[') > len(word)*2/3:
+                    rem_starts.append(_end)
+                else:
+                    rem_starts.append(_med)
+                
+            if ']]' in word:
+                if word.find(']]') < len(word)/3:
+                    rem_ends.append(_start)
+                elif word.find(']]') > len(word)*2/3:
+                    rem_ends.append(_end)
+                else:
+                    rem_ends.append(_med)
 
-    st.audio(output_audio_bytes, format="audio/mp3")
+        
+        temp_audio = AudioSegment.from_file(audio)
+        output_audio = AudioSegment.empty()
+        last_end = 0
+        for start, end in zip(rem_starts, rem_ends):
+            output_audio += temp_audio[last_end:start]
+            last_end = end
+        output_audio += temp_audio[last_end:]
+        
+        output_audio_bytes = BytesIO()
+        output_audio.export(output_audio_bytes, format="mp3")
+
+        st.audio(output_audio_bytes, format="audio/mp3")
+        st.download_button(
+            label="Pobierz audio", data=output_audio_bytes, 
+            file_name="output.mp3", mime="audio/mp3")
 
     
