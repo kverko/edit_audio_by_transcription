@@ -1,0 +1,4 @@
+- add validation of selection marks - so opening or closing mark is not duplicated (it is required for the selection to be opened and closed, not for example opened twice)
+- add limit to the length of the recorded speech
+- allow upload of mp3
+  - add validation of the size of uploaded mp3
