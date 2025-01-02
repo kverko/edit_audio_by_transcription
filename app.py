@@ -72,20 +72,23 @@ if new_audio:
    
     new_text = st.text_area(
         "",  value=transcription['text'])
-    st.markdown(
-        "Zaznacz w powyższym tekście fragmenty, który chcesz usunąć z audio, " 
+    st.write(
+        "Zaznacz w powyższym tekście fragmenty, które chcesz usunąć z audio, " 
         "otaczając je podwójnymi nawiasami kwadratowymi np. [[to jest fragment do usunięcia]]")
 
 if new_text:
-    text_with_edits = new_text
     if st.button("Wytnij zaznaczone fragmenty"):
         words = new_text.split(' ')
         rem_starts = []
         rem_ends = []
         
         for idx, word in enumerate(words):
-            _start = transcription['words'][idx].start*1000
-            _end = transcription['words'][idx].end*1000
+            try:
+                _start = transcription['words'][idx].start*1000
+                _end = transcription['words'][idx].end*1000
+            except AttributeError:
+                _start = transcription['words'][idx]['start']*1000
+                _end = transcription['words'][idx]['end']*1000
             _med = (_start + _end) / 2
             if '[[' in word:
                 if word.find('[[') < len(word)/3:
@@ -104,13 +107,12 @@ if new_text:
                     rem_ends.append(_med)
 
         
-        temp_audio = AudioSegment.from_file(audio)
         output_audio = AudioSegment.empty()
         last_end = 0
         for start, end in zip(rem_starts, rem_ends):
-            output_audio += temp_audio[last_end:start]
+            output_audio += new_audio[last_end:start]
             last_end = end
-        output_audio += temp_audio[last_end:]
+        output_audio += new_audio[last_end:]
         
         output_audio_bytes = BytesIO()
         output_audio.export(output_audio_bytes, format="mp3")
