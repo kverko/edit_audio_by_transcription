@@ -121,7 +121,7 @@ if st.session_state['new_text']:
             if '[[' in word:
                 start_position = word.find('[[')
                 if (start_position < len(word)/3) and (start_position != -1):
-                    rem_starts.append(_start)
+                    rem_starts.append(_start - 100)
                 elif start_position > len(word)*2/3:
                     rem_starts.append(_end)
                 else:
@@ -130,7 +130,7 @@ if st.session_state['new_text']:
             if ']]' in word:
                 end_position = word.find(']]')
                 if (end_position < len(word)/3) and (end_position != -1):
-                    rem_ends.append(_start)
+                    rem_ends.append(_start - 100)
                 elif end_position > len(word)*2/3:
                     rem_ends.append(_end)
                 else:
